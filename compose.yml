@@ -1,0 +1,16 @@
+services:
+  users:
+    build: ./users
+    container_name: users-api
+    ports:
+      - "3002:3002"
+    environment:
+      - PORT=3002
+
+  products:
+    build: ./products
+    container_name: products-api
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
