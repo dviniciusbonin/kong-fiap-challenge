@@ -1,0 +1,89 @@
+_format_version: "3.0"
+
+services:
+  - name: users
+    url: http://users-api:3002/users
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    routes:
+      - name: users
+        paths:
+          - /users
+        strip_path: true
+        protocols:
+          - http
+          - https
+        preserve_host: false
+        request_buffering: true
+        response_buffering: true
+        https_redirect_status_code: 426
+
+  - name: users-api
+    url: http://users-api:3002
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    routes:
+      - name: users-api
+        paths:
+          - /users-api
+        strip_path: true
+        protocols:
+          - http
+          - https
+        preserve_host: false
+        request_buffering: true
+        response_buffering: true
+        https_redirect_status_code: 426
+
+  - name: products-api
+    url: http://products-api:3001
+    connect_timeout: 60000
+    read_timeout: 60000
+    write_timeout: 60000
+    retries: 5
+    routes:
+      - name: products-api
+        paths:
+          - /products-api
+        strip_path: true
+        protocols:
+          - http
+          - https
+        preserve_host: false
+        request_buffering: true
+        response_buffering: true
+        https_redirect_status_code: 426
+
+consumers:
+  - username: admin
+    custom_id: admin-consumer
+    basicauth_credentials:
+      - username: admin
+        password: admin123
+
+plugins:
+  - name: basic-auth
+    service: users
+    config:
+      hide_credentials: true
+      realm: service
+      anonymous: null
+    protocols:
+      - http
+
+  - name: rate-limiting
+    service: users
+    config:
+      minute: 1
+      policy: local
+      fault_tolerant: true
+      limit_by: consumer
+      error_code: 429
+      error_message: "API rate limit exceeded"
+      hide_client_headers: false
+    protocols:
+      - http
